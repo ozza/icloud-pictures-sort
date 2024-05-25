@@ -10,31 +10,32 @@ from wand.image import Image as WandImage
 
 def get_date(file_path):
     _, file_extension = os.path.splitext(file_path)
-    image_extensions = ['.jpg', '.jpeg', '.png']
-    video_extensions = ['.mp4', '.mov', '.avi', '.3gp']
+    image_extensions = [".jpg", ".jpeg", ".png"]
+    video_extensions = [".mp4", ".mov", ".avi", ".3gp"]
 
     try:
         if file_extension.lower() in image_extensions:
             with Image.open(file_path) as img:
                 exif_data = img._getexif()
-                date_taken = exif_data.get(36867)  # 36867 is the tag for DateTimeOriginal
+                date_taken = exif_data.get(
+                    36867
+                )  # 36867 is the tag for DateTimeOriginal
                 if date_taken:
-                    return datetime.strptime(date_taken, '%Y:%m:%d %H:%M:%S')
+                    return datetime.strptime(date_taken, "%Y:%m:%d %H:%M:%S")
 
-        elif file_extension.lower() == '.heic':
+        elif file_extension.lower() == ".heic":
             with WandImage(filename=file_path) as img:
-                date_taken = img.metadata.get('exif:DateTimeOriginal')
+                date_taken = img.metadata.get("exif:DateTimeOriginal")
                 if date_taken:
-                    return datetime.strptime(date_taken, '%Y:%m:%d %H:%M:%S')
+                    return datetime.strptime(date_taken, "%Y:%m:%d %H:%M:%S")
 
         elif file_extension.lower() in video_extensions:
             with exiftool.ExifTool(executable="exiftool.exe") as et:
                 metadata = et.get_metadata(file_path)
-                media_created = metadata.get('QuickTime:MediaCreateDate')
+                media_created = metadata.get("QuickTime:MediaCreateDate")
                 if media_created:
-                    return datetime.strptime(media_created, '%Y:%m:%d %H:%M:%S')
+                    return datetime.strptime(media_created, "%Y:%m:%d %H:%M:%S")
 
-        # Fallback to Date Modified and then Date Created
         date_modified = os.path.getmtime(file_path)
         if date_modified:
             return datetime.fromtimestamp(date_modified)
@@ -52,12 +53,12 @@ def get_date(file_path):
 def copy_file(file_path, dest_folder):
     date = get_date(file_path)
     if date:
-        folder_name = date.strftime('%Y\\%B')
+        folder_name = date.strftime("%Y\\%B")
     else:
         folder_name = "Unknown"
 
     _, file_extension = os.path.splitext(file_path)
-    doc_extensions = ['.txt', '.doc', '.docx', '.pdf', '.odt']
+    doc_extensions = [".txt", ".doc", ".docx", ".pdf", ".odt"]
 
     if file_extension.lower() in doc_extensions:
         folder_name = "docs"
@@ -71,7 +72,7 @@ def copy_file(file_path, dest_folder):
     pbar.update(1)
 
 
-def copy_files_to_new_directory(src_folder, dest_folder="F:\\Pics"):
+def copy_files_to_new_directory(src_folder, dest_folder="Path/to/your/photos/folder"):
     if not os.path.exists(src_folder):
         print(f"Source folder '{src_folder}' does not exist.")
         return
@@ -96,5 +97,5 @@ def copy_files_to_new_directory(src_folder, dest_folder="F:\\Pics"):
 
 
 if __name__ == "__main__":
-    src_folder = "F:\\pic\\resimler\\iphone\\immich+1"
+    src_folder = "Path/to/your/source/folder"
     copy_files_to_new_directory(src_folder)
